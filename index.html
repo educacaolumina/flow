@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luntico Games — English Learning Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07080F;
+    --bg2: #0D0E1A;
+    --cream: #F0EBE0;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A0;
+    --gold-dim: rgba(201,168,76,0.15);
+    --green: #2D6A4F;
+    --green-light: #95D5B2;
+    --muted: rgba(240,235,224,0.35);
+    --border: rgba(240,235,224,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* ── NAVBAR ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px;
+    background: rgba(7,8,15,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 27px;
+    font-weight: 900;
+    color: var(--cream);
+    letter-spacing: -0.5px;
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--gold); font-style: italic; }
+
+  .nav-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 24px 60px;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  /* Radial bg glows */
+  .hero::after {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(45,106,79,0.12) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .hero-glow-1 {
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%);
+    top: 10%; right: -100px;
+    pointer-events: none;
+  }
+  .hero-glow-2 {
+    position: absolute;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(45,106,79,0.08) 0%, transparent 70%);
+    bottom: 10%; left: -80px;
+    pointer-events: none;
+  }
+
+  /* Floating orbs */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    pointer-events: none;
+    animation: float linear infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    25% { transform: translateY(-20px) translateX(10px); }
+    75% { transform: translateY(10px) translateX(-10px); }
+  }
+
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    opacity: 0.8;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(65px, 13.5vw, 130px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -3px;
+    color: var(--cream);
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .hero-title span { color: var(--gold); font-style: italic; }
+
+  .hero-subtitle {
+    font-size: clamp(20px, 3.4vw, 24px);
+    font-weight: 400;
+    color: var(--muted);
+    margin-top: 20px;
+    max-width: 480px;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-cta {
+    margin-top: 40px;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 36px;
+    background: linear-gradient(135deg, #C9A84C, #E8D5A0, #C9A84C);
+    background-size: 200% auto;
+    border: none;
+    border-radius: 50px;
+    color: #1A0F00;
+    font-family: 'Space Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+    box-shadow: 0 8px 32px rgba(201,168,76,0.3);
+  }
+  .btn-primary:hover {
+    background-position: right center;
+    box-shadow: 0 12px 48px rgba(201,168,76,0.5);
+    transform: translateY(-2px);
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 1;
+    animation: fadeUp 0.6s 0.6s ease both;
+  }
+  .hero-scroll span {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(240,235,224,0.2);
+  }
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, rgba(201,168,76,0.4), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.4; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(1.2); }
+  }
+
+  /* ── GAMES SECTION ── */
+  .games-section {
+    position: relative;
+    z-index: 1;
+    padding: 80px 24px 120px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  .section-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.7;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(43px, 6.8vw, 65px);
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    color: var(--cream);
+  }
+
+  /* GAME CARD */
+  .game-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .game-card:hover {
+    border-color: rgba(149,213,178,0.25);
+    transform: translateY(-4px);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+  }
+
+  .game-card-visual {
+    background: linear-gradient(160deg, #1A3329 0%, #0D1F17 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 32px;
+    position: relative;
+    overflow: hidden;
+    min-height: 320px;
+  }
+
+  .game-card-visual::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(149,213,178,0.08) 0%, transparent 70%);
+  }
+
+  /* Mini card preview */
+  .mini-card {
+    width: 120px;
+    height: 168px;
+    border-radius: 12px;
+    background: linear-gradient(160deg, #1A3329, #0D1F17);
+    border: 1px solid rgba(149,213,178,0.3);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    position: relative;
+    z-index: 2;
+    transform: rotate(-3deg);
+    transition: transform 0.3s;
+  }
+  .game-card:hover .mini-card { transform: rotate(0deg) scale(1.05); }
+
+  .mini-card-top {
+    height: 22px;
+    background: rgba(45,106,79,0.6);
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+  }
+  .mini-card-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: var(--green-light);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .mini-card-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 65px;
+  }
+  .mini-card-word {
+    padding: 6px 8px 8px;
+    text-align: center;
+    border-top: 1px solid rgba(240,235,224,0.06);
+  }
+  .mini-card-word-en {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--cream);
+  }
+  .mini-card-bottom { height: 3px; background: linear-gradient(90deg, transparent, var(--green-light), transparent); }
+
+  /* Second card shadow behind */
+  .mini-card-shadow {
+    position: absolute;
+    width: 120px; height: 168px;
+    border-radius: 12px;
+    background: #0A1810;
+    border: 1px solid rgba(149,213,178,0.1);
+    z-index: 1;
+    transform: rotate(4deg) translate(12px, 8px);
+  }
+
+  .game-card-info {
+    padding: 40px 40px 40px 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .game-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(149,213,178,0.08);
+    border: 1px solid rgba(149,213,178,0.2);
+    border-radius: 50px;
+    padding: 5px 12px;
+    width: fit-content;
+  }
+  .game-tag span {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green-light);
+    font-weight: 700;
+  }
+
+  .game-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 43px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    color: var(--cream);
+  }
+  .game-name em { color: var(--gold); font-style: italic; }
+
+  .game-desc {
+    font-size: 19px;
+    line-height: 1.75;
+    color: var(--muted);
+    max-width: 300px;
+  }
+
+  .game-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .meta-pill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(240,235,224,0.4);
+  }
+  .meta-pill .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green-light);
+    opacity: 0.6;
+  }
+
+  .game-card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 28px;
+    background: rgba(149,213,178,0.1);
+    border: 1.5px solid rgba(149,213,178,0.3);
+    border-radius: 50px;
+    color: var(--green-light);
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    width: fit-content;
+    margin-top: 4px;
+  }
+  .game-card-btn:hover {
+    background: rgba(149,213,178,0.2);
+    border-color: rgba(149,213,178,0.6);
+    transform: translateX(4px);
+  }
+
+  /* COMING SOON CARDS */
+  .coming-soon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+    max-width: 860px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .coming-card {
+    background: var(--bg2);
+    border: 1px dashed rgba(240,235,224,0.08);
+    border-radius: 16px;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+  .coming-card:hover { opacity: 0.7; }
+
+  .coming-icon { font-size: 38px; }
+  .coming-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 23px;
+    font-weight: 700;
+    color: var(--cream);
+  }
+  .coming-desc { font-size: 16px; color: var(--muted); line-height: 1.6; }
+  .coming-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.7;
+    margin-top: 4px;
+  }
+
+  /* ── PASSWORD MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(7,8,15,0.9);
+    backdrop-filter: blur(12px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal {
+    background: #0D0E1A;
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 24px;
+    padding: 44px 40px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+  }
+  .modal-overlay.open .modal {
+    transform: scale(1) translateY(0);
+  }
+
+  .modal-game-icon { font-size: 65px; margin-bottom: 16px; }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 35px;
+    font-weight: 900;
+    color: var(--cream);
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  .modal-title em { color: var(--gold); font-style: italic; }
+  .modal-sub {
+    font-size: 18px;
+    color: var(--muted);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+
+  .modal-input-wrap {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .modal-input {
+    width: 100%;
+    padding: 14px 20px;
+    background: rgba(240,235,224,0.05);
+    border: 1.5px solid rgba(240,235,224,0.12);
+    border-radius: 12px;
+    color: var(--cream);
+    font-family: 'Space Mono', monospace;
+    font-size: 19px;
+    letter-spacing: 3px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .modal-input:focus { border-color: rgba(201,168,76,0.5); }
+  .modal-input::placeholder {
+    color: rgba(240,235,224,0.2);
+    letter-spacing: 2px;
+    font-size: 15px;
+  }
+  .modal-input.error { border-color: rgba(244,160,181,0.5); animation: shake 0.3s ease; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+
+  .modal-error {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: #F4A0B5;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    min-height: 14px;
+  }
+
+  .modal-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #C9A84C, #E8D5A0, #C9A84C);
+    background-size: 200% auto;
+    border: none;
+    border-radius: 12px;
+    color: #1A0F00;
+    font-family: 'Space Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+  }
+  .modal-btn:hover { background-position: right center; }
+  .modal-btn:active { transform: scale(0.98); }
+
+  .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--cream); }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 36px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--cream);
+    opacity: 0.5;
+  }
+  .footer-logo span { color: var(--gold); font-style: italic; }
+
+  .footer-copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: rgba(240,235,224,0.2);
+    text-transform: uppercase;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    nav { padding: 16px 20px; }
+    .game-card { grid-template-columns: 1fr; }
+    .game-card-visual { min-height: 200px; padding: 32px; }
+    .game-card-info { padding: 28px 24px 32px; }
+    .game-name { font-size: 35px; }
+    footer { flex-direction: column; text-align: center; }
+    .modal { padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">Luntico<span>.</span>games</a>
+  <div class="nav-tag">English Learning Games</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow-1"></div>
+  <div class="hero-glow-2"></div>
+
+  <!-- Floating orbs -->
+  <div class="orb" style="width:200px;height:200px;background:rgba(45,106,79,0.06);top:15%;left:5%;animation-duration:8s;"></div>
+  <div class="orb" style="width:150px;height:150px;background:rgba(201,168,76,0.05);top:60%;right:8%;animation-duration:11s;"></div>
+  <div class="orb" style="width:100px;height:100px;background:rgba(149,213,178,0.04);bottom:20%;left:20%;animation-duration:9s;"></div>
+
+  <div class="hero-eyebrow">Games that teach</div>
+
+  <h1 class="hero-title">
+    Learn English<br><span>by playing.</span>
+  </h1>
+
+  <p class="hero-subtitle">
+    Interactive card games designed for English classrooms. Made for teachers, loved by students.
+  </p>
+
+  <div class="hero-cta">
+    <a href="#games" class="btn-primary">
+      🎴 &nbsp; See our games
+    </a>
+  </div>
+
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>scroll</span>
+  </div>
+</section>
+
+<!-- GAMES -->
+<section class="games-section" id="games">
+  <div class="section-header">
+    <div class="section-tag">Our games</div>
+    <h2 class="section-title">Play. Ask. Discover.</h2>
+  </div>
+
+  <!-- WHERE AM I card -->
+  <div class="game-card">
+    <div class="game-card-visual">
+      <div class="mini-card-shadow"></div>
+      <div class="mini-card">
+        <div class="mini-card-top">
+          <span class="mini-card-badge">Easy</span>
+        </div>
+        <div class="mini-card-body">🏖️</div>
+        <div class="mini-card-word">
+          <div class="mini-card-word-en">Beach</div>
+        </div>
+        <div class="mini-card-bottom"></div>
+      </div>
+    </div>
+
+    <div class="game-card-info">
+      <div class="game-tag">
+        <span>🌍 &nbsp; Available now</span>
+      </div>
+      <div class="game-name">WHERE<br><em>AM I?</em></div>
+      <p class="game-desc">
+        A deduction game where students ask Yes/No questions to discover a secret place. Builds vocabulary, critical thinking, and English fluency.
+      </p>
+      <div class="game-meta">
+        <div class="meta-pill"><div class="dot"></div> 60 cards</div>
+        <div class="meta-pill"><div class="dot"></div> 3 difficulty levels</div>
+        <div class="meta-pill"><div class="dot"></div> 2 game modes</div>
+      </div>
+      <button class="game-card-btn" onclick="openModal()">
+        🔑 &nbsp; Access game →
+      </button>
+    </div>
+  </div>
+
+  <!-- COMING SOON -->
+  <div style="margin-top:48px;max-width:860px;margin-left:auto;margin-right:auto;">
+    <div style="font-family:'Space Mono',monospace;font-size: 12px;letter-spacing:4px;text-transform:uppercase;color:rgba(240,235,224,0.2);margin-bottom:20px;text-align:center;">
+      Coming soon
+    </div>
+    <div class="coming-soon-grid">
+      <div class="coming-card">
+        <div class="coming-icon">🕵️</div>
+        <div class="coming-name">Who Am I?</div>
+        <div class="coming-desc">Guess the famous person through Yes/No questions about their life and work.</div>
+        <div class="coming-badge">In development</div>
+      </div>
+      <div class="coming-card">
+        <div class="coming-icon">🗓️</div>
+        <div class="coming-name">When Was It?</div>
+        <div class="coming-desc">Ask questions to discover a historical event or decade. History meets language.</div>
+        <div class="coming-badge">Coming soon</div>
+      </div>
+      <div class="coming-card">
+        <div class="coming-icon">🎭</div>
+        <div class="coming-name">What Am I?</div>
+        <div class="coming-desc">Objects, animals, and concepts — discover what's hidden through clever questions.</div>
+        <div class="coming-badge">Coming soon</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Luntico<span>.</span>games</div>
+  <div class="footer-copy">© 2026 Luntico Games · All rights reserved</div>
+</footer>
+
+<!-- PASSWORD MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-game-icon">🌍</div>
+    <div class="modal-title">WHERE <em>AM I?</em></div>
+    <div class="modal-sub">Enter your access password to play.<br>Don't have one? Contact us to get access.</div>
+
+    <div class="modal-input-wrap">
+      <input
+        class="modal-input"
+        id="password-input"
+        type="password"
+        placeholder="Enter password"
+        onkeydown="if(event.key==='Enter') checkPassword()"
+        oninput="clearError()"
+        autocomplete="off"
+      />
+    </div>
+    <div class="modal-error" id="modal-error"></div>
+
+    <button class="modal-btn" onclick="checkPassword()">Enter Game →</button>
+    <button class="modal-close" onclick="closeModal()">← Go back</button>
+  </div>
+</div>
+
+<script>
+  // ── PASSWORD ──
+  // The password is stored as a SHA-256 hash — not readable from source code.
+  // To change the password: generate a new SHA-256 hash of your password (lowercase)
+  // and replace the value below. You can use: https://emn178.github.io/online-tools/sha256.html
+  // Current password hash corresponds to: luntico2025
+  const ACCESS_HASH = '4187f651d4b216d56695ac31d6982b4311bc32790e11a33f4fe608d7444d65e6';
+
+  async function hashPassword(str) {
+    const encoded = new TextEncoder().encode(str);
+    const buffer = await crypto.subtle.digest('SHA-256', encoded);
+    return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function openModal() {
+    document.getElementById('modal-overlay').classList.add('open');
+    setTimeout(() => document.getElementById('password-input').focus(), 300);
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.getElementById('password-input').value = '';
+    clearError();
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  }
+
+  function clearError() {
+    document.getElementById('modal-error').textContent = '';
+    document.getElementById('password-input').classList.remove('error');
+  }
+
+  async function checkPassword() {
+    const input = document.getElementById('password-input').value.trim().toLowerCase();
+    const inputHash = await hashPassword(input);
+    if (inputHash === ACCESS_HASH) {
+      window.location.href = 'where-am-i/index.html';
+    } else {
+      const el = document.getElementById('password-input');
+      el.classList.add('error');
+      document.getElementById('modal-error').textContent = 'Wrong password — try again';
+      el.value = '';
+      setTimeout(() => el.classList.remove('error'), 500);
+    }
+  }
+</script>
+
+</body>
+</html>
